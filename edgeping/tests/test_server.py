@@ -1,4 +1,7 @@
-import  threading
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at https://mozilla.org/MPL/2.0/.
+import threading
 import socketserver
 import requests
 import time
@@ -28,11 +31,12 @@ def test_server_status():
 
     with server() as root_url:
         res = requests.get(root_url + "/status")
-        assert res.text  == 'OK'
+        assert res.text == "OK"
+
 
 def zip_content(json_content):
     s = io.BytesIO()
-    with gzip.GzipFile(fileobj=s, mode='w') as g:
+    with gzip.GzipFile(fileobj=s, mode="w") as g:
         g.write(json.dumps(json_content).encode())
     return s.getvalue()
 
@@ -41,23 +45,22 @@ def test_server_data():
 
     with server() as root_url:
         # posting data
-        headers = {'content-encoding' :'gzip'}
+        headers = {"content-encoding": "gzip"}
         data = {"my": "data"}
         zdata = zip_content(data)
         zlib.decompress(zdata, zlib.MAX_WBITS | 16)
 
         url = "/submit/<namespace>/<docType>/<docVersion>/<docId>"
         res = requests.post(root_url + url, data=zdata, headers=headers)
-        assert res.text  == 'OK'
+        assert res.text == "OK"
 
         # getting it back
         res = requests.get(root_url + "/pings")
-        assert res.json()  ==  [data]
+        assert res.json() == [data]
 
         # deleting it
         res = requests.delete(root_url + "/pings")
-        assert res.text  == 'OK'
+        assert res.text == "OK"
 
         res = requests.get(root_url + "/pings")
-        assert res.json()  == []
-
+        assert res.json() == []
