@@ -15,7 +15,7 @@ PINGS = []
 
 
 class PingHandling(BaseHTTPRequestHandler):
-    def _response(self, body, status=200, content_type="text/html"):
+    def _response(self, body, status=200, content_type="plain/text"):
         self.send_response(status)
         self.send_header("Content-type", content_type)
         self.end_headers()
@@ -24,7 +24,7 @@ class PingHandling(BaseHTTPRequestHandler):
     def do_DELETE(self):
         if self.path == "/pings":
             PINGS[:] = []
-            return self._response("OK")
+            return self._response(b"OK")
         self._response(b"Not found", 404)
 
     def do_GET(self):
@@ -32,7 +32,7 @@ class PingHandling(BaseHTTPRequestHandler):
         if self.path == "/status":
             return self._response(b"OK")
         if self.path == "/pings":
-            return self._response(json.dumps(PINGS))
+            return self._response(json.dumps(PINGS).encode())
         self._response(b"Not found", 404)
 
     def do_POST(self):
@@ -41,7 +41,6 @@ class PingHandling(BaseHTTPRequestHandler):
             return self._response(b"Not found", 404)
         # /submit/<namespace>/<docType>/<docVersion>/<docId>
         splitted = self.path.split("/")
-        print(splitted)
         content_length = int(self.headers["Content-Length"])
         data = self.rfile.read(content_length)
 
